@@ -1,19 +1,14 @@
 from __future__ import print_function, division
+
 import os
-from sklearn.preprocessing import OneHotEncoder
-import torch
-import pandas as pd
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-from torch.utils.data import Dataset, DataLoader
-import torchaudio
-import torchaudio.functional as AUF
-import torch.nn.functional as NNF
-import torchaudio.transforms as T
 
 import librosa
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torchaudio
+from sklearn.preprocessing import OneHotEncoder
+from torch.utils.data import Dataset
 
 print(torch.__version__)
 print(torchaudio.__version__)
@@ -52,6 +47,7 @@ class GTZANDataset(Dataset):
                                            hop_length=self.hop_length)
 
         sample = librosa.amplitude_to_db(S, ref=1.0)
+        sample = np.expand_dims(sample, axis=0)
         sample = torch.from_numpy(sample)
 
         label = self.labels[index]
