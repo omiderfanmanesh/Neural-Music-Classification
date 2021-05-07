@@ -1,15 +1,12 @@
 import os
-import numpy as np
-from numpy.random import RandomState
-import matplotlib.pyplot as plt
+
 import librosa
 import librosa.display
-import dill
 import pylab
 from tqdm import tqdm
-import matplotlib
 
-matplotlib.use('Agg')
+
+# matplotlib.use('Agg') # No pictures displayed
 
 
 def create_dataset(genre_folder='./Data/genres_original', save_folder='song_data',
@@ -46,9 +43,30 @@ def create_dataset(genre_folder='./Data/genres_original', save_folder='song_data
             os.makedirs(target_folder, exist_ok=True)
             save_name = song.split('.wav')[0] + '.png'
             save_path = target_folder + '/' + save_name
+            print(log_S.shape)
             librosa.display.specshow(log_S)
-            pylab.savefig(save_path, bbox_inches=None, pad_inches=0)
+            pylab.savefig(save_path, bbox_inches='tight', pad_inches=0)
             pylab.close()
 
+# from MusicDataLoader.Loader import GTZANDataset
+# from torch.utils.data import DataLoader
+#
 # if __name__ == '__main__':
-#     create_dataset()
+#     #
+#     # create_dataset()
+#
+#     #example of data loader
+#     # dataset = GTZANDataset()
+#     # dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
+#     #
+#     # # Display image and label.
+#     # train_features, train_labels = next(iter(dataloader))
+#     # print(f"Feature batch shape: {train_features.size()}")
+#     # print(f"Labels batch shape: {train_labels.size()}")
+#     # img = train_features[0].squeeze()
+#     # label = train_labels[0]
+#     # plt.imshow(img)
+#     # plt.savefig('tests.png', bbox_inches='tight', pad_inches=0)
+#     # plt.show()
+#     #
+#     # print(f"Label: {label}")
