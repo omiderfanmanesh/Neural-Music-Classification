@@ -2,18 +2,22 @@ import os
 
 import librosa
 import librosa.display
+import numpy as np
 import pylab
+import torch
 from tqdm import tqdm
+
+print(torch.version.__version__)
 
 
 # matplotlib.use('Agg') # No pictures displayed
 
 
-def create_dataset(genre_folder='./Data/genres_original', save_folder='song_data',
+def create_dataset(genre_folder='./data/genres_original', save_folder='song_data',
                    sr=16000, n_mels=128,
                    n_fft=2048, hop_length=512):
     """This function creates the dataset given a folder
-     with the correct structure (project root/Data/genres_original/[genres]/*.wav)
+     with the correct structure (project root/data/genres_original/[genres]/*.wav)
     and saves it to a specified folder."""
 
     # get list of all artists
@@ -25,7 +29,7 @@ def create_dataset(genre_folder='./Data/genres_original', save_folder='song_data
     # iterate through all artists, albums, songs and find mel spectrogram
     for genre in tqdm(genres):
         print(genre)
-        # e.g. ./Data/generes_original/country
+        # e.g. ./data/generes_original/country
         genre_path = os.path.join(genre_folder, genre)
         # extract all sounds from genre_path
         songs = os.listdir(genre_path)
@@ -48,7 +52,8 @@ def create_dataset(genre_folder='./Data/genres_original', save_folder='song_data
             pylab.savefig(save_path, bbox_inches='tight', pad_inches=0)
             pylab.close()
 
-# from MusicDataLoader.Loader import GTZANDataset
+
+# from music_data_loader.Loader import GTZANDataset
 # from torch.utils.data import DataLoader
 #
 # if __name__ == '__main__':
@@ -70,3 +75,14 @@ def create_dataset(genre_folder='./Data/genres_original', save_folder='song_data
 #     # plt.show()
 #     #
 #     # print(f"Label: {label}")
+
+def pad_along_axis(arr, target_length, axis):
+    pad_size = target_length - arr.shape[axis]
+
+    if pad_size <= 0:
+        return arr
+
+    npad = [(0, 0)] * arr.ndim
+    npad[axis] = (0, pad_size)
+
+    return np.pad(arr, pad_width=npad, mode='constant', constant_values=0)
