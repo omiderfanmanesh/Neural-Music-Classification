@@ -3,6 +3,7 @@
 
 import logging
 
+from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.handlers import ModelCheckpoint, Timer
 from ignite.metrics import Accuracy, Loss, RunningAverage
@@ -30,15 +31,19 @@ def do_train(
     trainer = create_supervised_trainer(model, optimizer, loss_fn, device=device)
     evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(),
                                                             'ce_loss': Loss(loss_fn)}, device=device)
-    checkpointer = ModelCheckpoint(output_dir, 'mnist', None, n_saved=10, require_empty=False)
+    checkpointer = ModelCheckpoint(output_dir, 'music', n_saved=10, require_empty=False)
     timer = Timer(average=True)
 
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpointer, {'model': model.state_dict(),
-                                                                     'optimizer': optimizer.state_dict()})
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpointer, {'model': model,
+                                                                     'optimizer': optimizer})
+
     timer.attach(trainer, start=Events.EPOCH_STARTED, resume=Events.ITERATION_STARTED,
                  pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED)
 
     RunningAverage(output_transform=lambda x: x).attach(trainer, 'avg_loss')
+
+    pbar = ProgressBar(persist=True, bar_format="")
+    pbar.attach(trainer)
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(engine):

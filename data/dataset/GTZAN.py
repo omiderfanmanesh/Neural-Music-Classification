@@ -64,7 +64,7 @@ class GTZANDataset(Dataset):
 
         label = self.labels[index]
         # label = torch.from_numpy(label)
-        print(sample.shape, label)
+        # print(sample.shape, label)
         if self.transform:
             sample = self.transform(sample)
         return sample, label

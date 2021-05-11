@@ -109,7 +109,7 @@ class MusicClassification(nn.Module):
         # x [16, 56, 128]
         device = torch.device("cuda" if torch.cuda.is_available()
                               else "cpu")
-        h0 = torch.zeros((1, 16, 32)).to(device)
+        h0 = torch.zeros((1, x.size(0), 32)).to(device)
         x, h1 = self.gru1(x, h0)
         # x [16, 56, 32]
         x, _ = self.gru2(x, h1)
