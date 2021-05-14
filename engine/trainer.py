@@ -3,6 +3,7 @@
 
 import logging
 
+import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.handlers import ModelCheckpoint, Timer
@@ -22,6 +23,7 @@ def do_train(
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
     output_dir = cfg.OUTPUT_DIR
     device = cfg.MODEL.DEVICE
+    device = torch.device("cuda")
     epochs = cfg.SOLVER.MAX_EPOCHS
 
     model = model.to(device)

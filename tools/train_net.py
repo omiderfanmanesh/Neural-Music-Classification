@@ -21,7 +21,9 @@ def train(cfg):
     model = build_model(cfg)
     device = cfg.MODEL.DEVICE
 
-    optimizer = make_optimizer(cfg, model)
+    optimizer = make_optimizer(cfg=cfg,
+                               model_params=model.parameters(),
+                               opt='ADAM')
     scheduler = None
 
     arguments = {}

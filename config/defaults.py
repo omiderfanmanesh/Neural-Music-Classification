@@ -27,29 +27,39 @@ _C.DATASETS = CN()
 _C.DATALOADER = CN()
 # Number of data loading threads
 _C.DATALOADER.NUM_WORKERS = 8
+# ---------------------------------------------------------------------------- #
+# Optimizers
+# ---------------------------------------------------------------------------- #
+_C.OPT = CN()
+
+_C.OPT.SGD = CN()
+
+_C.OPT.SGD.OPTIMIZER_NAME = "SGD"
+_C.OPT.SGD.LR = 0.001  # DEFAULT  0.001
+_C.OPT.SGD.MOMENTUM = 0  # DEFAULT 0
+_C.OPT.SGD.WEIGHT_DECAY = 0  # DEFAULT 0
+_C.OPT.SGD.DAMPENING = 0  # DEFAULT 0
+_C.OPT.SGD.NESTEROV = False  # DEFAULT FALSE
+
+# ------------------------------------------------------------------------------ #
+_C.OPT.ADAM = CN()
+_C.OPT.ADAM.OPTIMIZER_NAME = "ADAM"
+_C.OPT.ADAM.LR = 0.001  # DEFAULT  0.001
+_C.OPT.ADAM.BETAS = [0.9, 0.999]  # DEFAULT [0.9, 0.999]
+_C.OPT.ADAM.EPS = 1e-08  # DEFAULT 1e-08
+_C.OPT.ADAM.WEIGHT_DECAY = 0  # DEFAULT 0
+_C.OPT.ADAM.AMS_GRAD = False  # DEFAULT FALSE
+
+# ------------------------------------------------------------------------------ #
+
 
 # ---------------------------------------------------------------------------- #
 # Solver
 # ---------------------------------------------------------------------------- #
 _C.SOLVER = CN()
-_C.SOLVER.OPTIMIZER_NAME = "SGD"
 
 _C.SOLVER.MAX_EPOCHS = 50
 
-_C.SOLVER.BASE_LR = 0.001
-_C.SOLVER.BIAS_LR_FACTOR = 2
-
-_C.SOLVER.MOMENTUM = 0.9
-
-_C.SOLVER.WEIGHT_DECAY = 0.0005
-_C.SOLVER.WEIGHT_DECAY_BIAS = 0
-
-_C.SOLVER.GAMMA = 0.1
-_C.SOLVER.STEPS = (30000,)
-
-_C.SOLVER.WARMUP_FACTOR = 1.0 / 3
-_C.SOLVER.WARMUP_ITERS = 500
-_C.SOLVER.WARMUP_METHOD = "linear"
 
 _C.SOLVER.CHECKPOINT_PERIOD = 10
 _C.SOLVER.LOG_PERIOD = 100
