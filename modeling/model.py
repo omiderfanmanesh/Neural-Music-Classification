@@ -46,7 +46,7 @@ class MusicClassification(nn.Module):
         self.activation = nn.ELU()
 
         self.dense = nn.Linear(32, num_class)
-        self.softmax = nn.LogSoftmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         # x [16, 1, 128,938]
@@ -117,7 +117,7 @@ class MusicClassification(nn.Module):
         x = x[:, -1, :]
         x = self.dense(x)
         # x [16,10]
-        x = self.softmax(x)
+        # x = self.softmax(x)
         # x [16, 10]
         # x = torch.argmax(x, 1)
         return x

@@ -7,7 +7,8 @@ import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.handlers import ModelCheckpoint, Timer
-from ignite.metrics import Accuracy, Loss, RunningAverage
+from ignite.metrics import Accuracy, Loss, RunningAverage, Recall, Precision
+from ignite.metrics.metrics_lambda import MetricsLambda
 
 
 def do_train(
@@ -30,8 +31,17 @@ def do_train(
 
     logger = logging.getLogger("template_model.train")
     logger.info("Start training")
+
+    precision = Precision(average=True, is_multilabel=True)
+    recall = Recall(average=True, is_multilabel=True)
+    F1 = precision * recall * 2 / (precision + recall + 1e-20)
+    F1 = MetricsLambda(lambda t: torch.mean(t).item(), F1)
+
     trainer = create_supervised_trainer(model, optimizer, loss_fn, device=device)
     evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(),
+                                                            'precision': precision,
+                                                            'recall': recall,
+                                                            'f1': F1,
                                                             'ce_loss': Loss(loss_fn)}, device=device)
     checkpointer = ModelCheckpoint(output_dir, 'music', n_saved=10, require_empty=False)
     timer = Timer(average=True)
@@ -58,22 +68,35 @@ def do_train(
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
         evaluator.run(train_loader)
+
         metrics = evaluator.state.metrics
         avg_accuracy = metrics['accuracy']
+        precision = metrics['precision']
+        recall = metrics['recall']
+        f1 = metrics['f1']
+
         avg_loss = metrics['ce_loss']
-        logger.info("Training Results - Epoch: {} Avg accuracy: {:.3f} Avg Loss: {:.3f}"
-                    .format(engine.state.epoch, avg_accuracy, avg_loss))
+
+        logger.info(
+            "Training Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f},  Avg Loss: {:.3f}"
+                .format(engine.state.epoch, avg_accuracy, precision, recall, f1, avg_loss))
 
     if val_loader is not None:
         @trainer.on(Events.EPOCH_COMPLETED)
         def log_validation_results(engine):
             evaluator.run(val_loader)
             metrics = evaluator.state.metrics
+
             avg_accuracy = metrics['accuracy']
+            precision = metrics['precision']
+            recall = metrics['recall']
+            f1 = metrics['f1']
+
             avg_loss = metrics['ce_loss']
-            logger.info("Validation Results - Epoch: {} Avg accuracy: {:.3f} Avg Loss: {:.3f}"
-                        .format(engine.state.epoch, avg_accuracy, avg_loss)
-                        )
+            logger.info(
+                "Validation Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f}, Avg Loss: {:.3f}"
+                    .format(engine.state.epoch, avg_accuracy, precision, recall, f1, avg_loss)
+            )
 
     # adding handlers using `trainer.on` decorator API
     @trainer.on(Events.EPOCH_COMPLETED)

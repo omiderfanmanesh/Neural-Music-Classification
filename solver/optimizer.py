@@ -1,4 +1,5 @@
 from .adam import Adam
+from .sgd import SGD
 
 
 class OptimizerFactory:
@@ -10,5 +11,7 @@ class OptimizerFactory:
     def get_opt(self):
         if str(self.opt).upper() == 'ADAM':
             return Adam(self.cfg, self.model_params).optimizer()
+        elif str(self.opt).upper() == 'SGD':
+            return SGD(self.cfg, self.model_params).optimizer()
         else:
             raise ValueError(self.opt)
