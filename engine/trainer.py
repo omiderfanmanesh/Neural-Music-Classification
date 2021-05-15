@@ -7,8 +7,9 @@ import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.handlers import ModelCheckpoint, Timer
-from ignite.metrics import Accuracy, Loss, RunningAverage, Recall, Precision
-from ignite.metrics.metrics_lambda import MetricsLambda
+from ignite.metrics import Accuracy, Loss, RunningAverage, Fbeta
+from ignite.metrics.precision import Precision
+from ignite.metrics.recall import Recall
 
 
 def do_train(
@@ -32,10 +33,24 @@ def do_train(
     logger = logging.getLogger("template_model.train")
     logger.info("Start training")
 
-    precision = Precision(average=True, is_multilabel=True)
-    recall = Recall(average=True, is_multilabel=True)
-    F1 = precision * recall * 2 / (precision + recall + 1e-20)
-    F1 = MetricsLambda(lambda t: torch.mean(t).item(), F1)
+    # precision = Precision(average=True,device=device)
+    # recall = Recall(average=True,device=device)
+    # F1 = precision * recall * 2 / (precision + recall + 1e-20)
+
+    precision = Precision(average=False)
+    recall = Recall(average=False)
+    # F1 = (precision * recall * 2 / (precision + recall)).mean()
+    F1 = Fbeta(beta=1.0, average=False, precision=precision, recall=recall)
+
+    def output_transform(output):
+        # `output` variable is returned by above `process_function`
+        y_pred = output[0]
+        y_pred = torch.argmax(y_pred, dim=1)
+        # y = output[1].cpu().numpy()
+        # y = np.identity(10)[y]
+        # y = torch.from_numpy(y)
+        y = output[1]
+        return y_pred, y  # output format is according to `Accuracy` docs
 
     trainer = create_supervised_trainer(model, optimizer, loss_fn, device=device)
     evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(),
@@ -70,10 +85,17 @@ def do_train(
         evaluator.run(train_loader)
 
         metrics = evaluator.state.metrics
+
         avg_accuracy = metrics['accuracy']
+
         precision = metrics['precision']
+        precision = torch.mean(precision)
+
         recall = metrics['recall']
+        recall = torch.mean(recall)
+
         f1 = metrics['f1']
+        f1 = torch.mean(f1)
 
         avg_loss = metrics['ce_loss']
 
@@ -88,9 +110,15 @@ def do_train(
             metrics = evaluator.state.metrics
 
             avg_accuracy = metrics['accuracy']
+
             precision = metrics['precision']
+            precision = torch.mean(precision)
+
             recall = metrics['recall']
+            recall = torch.mean(recall)
+
             f1 = metrics['f1']
+            f1 = torch.mean(f1)
 
             avg_loss = metrics['ce_loss']
             logger.info(

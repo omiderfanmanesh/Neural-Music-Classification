@@ -16,6 +16,20 @@ from solver import make_optimizer
 
 from utils.logger import setup_logger
 
+import random
+
+SEED = 2021
+random.seed(SEED)
+
+import torch
+
+torch.manual_seed(SEED)
+torch.cuda.manual_seed(SEED)
+
+import numpy as np
+
+np.random.seed(SEED)
+
 
 def train(cfg):
     model = build_model(cfg)

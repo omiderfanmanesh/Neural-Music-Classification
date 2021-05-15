@@ -30,7 +30,7 @@ print(pathlib.Path().absolute())
 class GTZANDataset(Dataset):
     def __init__(self,
                  genre_folder='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original',
-                 one_hot_encoding=False,
+                 one_hot_encoding=True,
                  sr=16000, n_mels=128,
                  n_fft=2048, hop_length=512,
                  transform=None):
@@ -103,7 +103,7 @@ class GTZANDataset(Dataset):
         labels = np.array(labels)
         # convert labels to one-hot encoding
         # if self.one_hot_encoding:
-        #     labels = OneHotEncoder(sparse=False).fit_transform(labels)
+        #     labels = OneHotEncoder(sparse=False).fit_transform(labels.reshape((-1,1)))
         # else:
         #     labels = LabelEncoder().fit_transform(labels)
 
