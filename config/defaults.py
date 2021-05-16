@@ -26,7 +26,17 @@ _C.DATASETS = CN()
 # -----------------------------------------------------------------------------
 _C.DATALOADER = CN()
 # Number of data loading threads
-_C.DATALOADER.NUM_WORKERS = 8
+_C.DATALOADER.NUM_WORKERS = 2
+_C.DATALOADER.DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original'
+_C.DATALOADER.NPY_SAMPLES_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/samples_pad_1024.npy'
+_C.DATALOADER.NPY_LABELS_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/labels.npy'
+_C.DATALOADER.LOAD_FROM_NUMPY = True
+_C.DATALOADER.ONE_HOT_ENCODING = True
+_C.DATALOADER.SR = 16000
+_C.DATALOADER.N_MELS = 128,
+_C.DATALOADER.N_FFT = 2048
+_C.DATALOADER.HOP_LENGTH = 512,
+
 # ---------------------------------------------------------------------------- #
 # Optimizers
 # ---------------------------------------------------------------------------- #
@@ -44,7 +54,7 @@ _C.OPT.SGD.NESTEROV = False  # DEFAULT FALSE
 # ------------------------------------------------------------------------------ #
 _C.OPT.ADAM = CN()
 _C.OPT.ADAM.OPTIMIZER_NAME = "ADAM"
-_C.OPT.ADAM.LR = 0.001  # DEFAULT  0.001
+_C.OPT.ADAM.LR = 0.0001  # DEFAULT  0.001
 _C.OPT.ADAM.BETAS = [0.9, 0.999]  # DEFAULT [0.9, 0.999]
 _C.OPT.ADAM.EPS = 1e-08  # DEFAULT 1e-08
 _C.OPT.ADAM.WEIGHT_DECAY = 0  # DEFAULT 0

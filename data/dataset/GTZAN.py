@@ -28,46 +28,75 @@ print(pathlib.Path().absolute())
 
 
 class GTZANDataset(Dataset):
-    def __init__(self,
-                 genre_folder='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original',
-                 one_hot_encoding=True,
-                 sr=16000, n_mels=128,
-                 n_fft=2048, hop_length=512,
-                 transform=None):
+    def __init__(self, cfg, transforms):
 
-        self.genre_folder = genre_folder
-        self.one_hot_encoding = one_hot_encoding
-        self.audio_address, self.labels = self.extract_address()
-        self.sr = sr
-        self.n_mels = n_mels
-        self.n_fft = n_fft
-        self.transform = transform
+        self.load_from_numpy = cfg.DATALOADER.LOAD_FROM_NUMPY
+        self.np_samples_address = cfg.DATALOADER.NPY_SAMPLES_DATASET_ADDRESS
+        self.np_labels_address = cfg.DATALOADER.NPY_LABELS_DATASET_ADDRESS
+        self.genre_folder = cfg.DATALOADER.DATASET_ADDRESS
+        self.one_hot_encoding = cfg.DATALOADER.ONE_HOT_ENCODING
+
+        if self.load_from_numpy:
+            self.samples, self.labels = self.load_from_np()
+        else:
+            self.samples, self.labels = self.extract_address()
+
+        self.sr = cfg.DATALOADER.SR
+        self.n_mels = cfg.DATALOADER.N_MELS
+        self.n_fft = cfg.DATALOADER.N_FFT
+        self.hop_length = cfg.DATALOADER.HOP_LENGTH
+
+        self.transform = transforms
         self.le = LabelEncoder()
-        self.hop_length = hop_length
+
 
     def __len__(self):
         return len(self.labels)
 
     def __getitem__(self, index):
-        address = self.audio_address[index]
-        y, sr = librosa.load(address, sr=self.sr)
-        S = librosa.feature.melspectrogram(y, sr=sr,
-                                           n_mels=self.n_mels,
-                                           n_fft=self.n_fft,
-                                           hop_length=self.hop_length)
+        if self.load_from_numpy:
+            label_map = {
+                'blues': 0,
+                'classical': 1,
+                'country': 2,
+                'disco': 3,
+                'hiphop': 4,
+                'jazz': 5,
+                'metal': 6,
+                'pop': 7,
+                'reggae': 8,
+                'rock': 9
+            }
+            sample = self.samples[index]
+            sample = np.expand_dims(sample, axis=0)
+            sample = torch.from_numpy(sample)
+            label = self.labels[index]
+            label = label_map[label]
+        else:
+            address = self.samples[index]
+            y, sr = librosa.load(address, sr=self.sr)
+            S = librosa.feature.melspectrogram(y, sr=sr,
+                                               n_mels=self.n_mels,
+                                               n_fft=self.n_fft,
+                                               hop_length=self.hop_length)
 
-        sample = librosa.amplitude_to_db(S, ref=1.0)
-        sample = np.expand_dims(sample, axis=0)
-        sample = pad_along_axis(sample, 1024, axis=2)
-        # print(sample.shape)
-        sample = torch.from_numpy(sample)
+            sample = librosa.amplitude_to_db(S, ref=1.0)
+            sample = np.expand_dims(sample, axis=0)
+            sample = pad_along_axis(sample, 1024, axis=2)
+            # print(sample.shape)
+            sample = torch.from_numpy(sample)
 
-        label = self.labels[index]
-        # label = torch.from_numpy(label)
-        # print(sample.shape, label)
-        if self.transform:
-            sample = self.transform(sample)
+            label = self.labels[index]
+            # label = torch.from_numpy(label)
+            # print(sample.shape, label)
+            if self.transform:
+                sample = self.transform(sample)
+
         return sample, label
+
+    def load_from_np(self):
+        return np.load(self.np_samples_address), \
+               np.load(self.np_labels_address)
 
     def extract_address(self):
         label_map = {
