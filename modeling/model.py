@@ -8,7 +8,6 @@ print('cuda', torch.cuda.is_available())
 class MusicClassification(nn.Module):
     def __init__(self, cfg):
         super(MusicClassification, self).__init__()
-        device = cfg.MODEL.DEVICE
         num_class = cfg.MODEL.NUM_CLASSES
 
         self.np_layers = 4

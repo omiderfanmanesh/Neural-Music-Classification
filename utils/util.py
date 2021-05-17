@@ -17,6 +17,9 @@ from numpy.random import RandomState
 
 np.random.seed(42)
 
+from pydub import AudioSegment
+from pydub.utils import make_chunks
+
 
 # matplotlib.use('Agg') # No pictures displayed
 
@@ -301,9 +304,29 @@ def pad_along_axis(arr, target_length, axis):
     return np.pad(arr, pad_width=npad, mode='constant', constant_values=0)
 
 
-if __name__ == '__main__':
-    create_dataset()
+def audio_clips(chunk_length_ms=3000, genre_folder='../data/dataset/genres_original',
+                save_folder='../data/dataset/slice3s', ):
+    genres = [path for path in os.listdir(genre_folder)]
+    for genre in tqdm(genres):
+        print(genre)
+        os.makedirs(os.path.join(save_folder, genre), exist_ok=True)
+        # e.g. ./data/generes_original/country
+        genre_path = os.path.join(genre_folder, genre)
+        # extract all sounds from genre_path
+        songs = os.listdir(genre_path)
 
+        for song in tqdm(songs):
+            song_path = os.path.join(genre_path, song)
+            audio = AudioSegment.from_file(song_path, "wav")
+            chunks = make_chunks(audio, chunk_length_ms)
+            for i, chunk in enumerate(chunks):
+                chunk_name = save_folder + '/' + genre + '/' + song.split('.wav')[0] + "_chunk{0}.wav".format(i)
+                chunk.export(chunk_name, format="wav")
+
+
+if __name__ == '__main__':
+    # create_dataset()
+    audio_clips()
     # plt.imshow(img)
     # plt.savefig('tests.png', bbox_inches='tight', pad_inches=0)
     # plt.show()
