@@ -28,11 +28,19 @@ print(pathlib.Path().absolute())
 
 
 class GTZANDataset(Dataset):
-    def __init__(self, cfg, transforms):
+    def __init__(self, cfg, transforms, training_type=0):
 
         self.load_from_numpy = cfg.DATALOADER.LOAD_FROM_NUMPY
-        self.np_samples_address = cfg.DATALOADER.NPY_SAMPLES_DATASET_ADDRESS
-        self.np_labels_address = cfg.DATALOADER.NPY_LABELS_DATASET_ADDRESS
+        if training_type == 0:
+            self.np_samples_address = cfg.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS
+            self.np_labels_address = cfg.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS
+        elif training_type == 1:
+            self.np_samples_address = cfg.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS
+            self.np_labels_address = cfg.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS
+        elif training_type == 2:
+            self.np_samples_address = cfg.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS
+            self.np_labels_address = cfg.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS
+
         self.genre_folder = cfg.DATALOADER.DATASET_ADDRESS
         self.one_hot_encoding = cfg.DATALOADER.ONE_HOT_ENCODING
 
@@ -48,7 +56,6 @@ class GTZANDataset(Dataset):
 
         self.transform = transforms
         self.le = LabelEncoder()
-
 
     def __len__(self):
         return len(self.labels)

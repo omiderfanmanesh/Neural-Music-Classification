@@ -262,6 +262,8 @@ def create_dataset(genre_folder='../data/dataset/genres_original', save_folder='
                                                n_fft=n_fft,
                                                hop_length=hop_length)
             log_S = librosa.amplitude_to_db(S, ref=1.0)
+            if log_S.shape[1] != 94:
+                continue
             # sample = np.expand_dims(log_S, axis=2)
             # sample = pad_along_axis(log_S, 1024, axis=1)
             samples.append(log_S)
@@ -273,7 +275,7 @@ def create_dataset(genre_folder='../data/dataset/genres_original', save_folder='
             if max_shape < log_S.shape[1]:
                 max_shape = log_S.shape[1]
 
-            print(genre, log_S.shape)
+            print(song_path, log_S.shape)
             # librosa.display.specshow(sample)
             # pylab.savefig(save_path, bbox_inches='tight', pad_inches=0)
             # pylab.close()
@@ -285,10 +287,10 @@ def create_dataset(genre_folder='../data/dataset/genres_original', save_folder='
             # with open(os.path.join(save_folder, save_name), 'wb') as fp:
             #     dill.dump(data, fp)
     samples = np.array(samples)
-    # labels = np.array(labels)
+    labels = np.array(labels)
 
-    np.save('samples_np_pad.npy', samples)
-    # np.save('labels.npy',labels)
+    np.save('../data/dataset/slice3s/validation/samples_val.npy', samples)
+    np.save('../data/dataset/slice3s/validation/labels_val.npy', labels)
     print(max_shape)
 
 
@@ -304,12 +306,12 @@ def pad_along_axis(arr, target_length, axis):
     return np.pad(arr, pad_width=npad, mode='constant', constant_values=0)
 
 
-def audio_clips(chunk_length_ms=3000, genre_folder='../data/dataset/genres_original',
-                save_folder='../data/dataset/slice3s', ):
+def audio_clips(genre_folder='../data/dataset/genres_original',
+                save_folder='../data/dataset/slice3s'):
     genres = [path for path in os.listdir(genre_folder)]
+    addresses = []
     for genre in tqdm(genres):
         print(genre)
-        os.makedirs(os.path.join(save_folder, genre), exist_ok=True)
         # e.g. ./data/generes_original/country
         genre_path = os.path.join(genre_folder, genre)
         # extract all sounds from genre_path
@@ -317,16 +319,37 @@ def audio_clips(chunk_length_ms=3000, genre_folder='../data/dataset/genres_origi
 
         for song in tqdm(songs):
             song_path = os.path.join(genre_path, song)
-            audio = AudioSegment.from_file(song_path, "wav")
-            chunks = make_chunks(audio, chunk_length_ms)
-            for i, chunk in enumerate(chunks):
-                chunk_name = save_folder + '/' + genre + '/' + song.split('.wav')[0] + "_chunk{0}.wav".format(i)
-                chunk.export(chunk_name, format="wav")
+            addresses.append([song_path, genre, song])
+
+    addresses = np.array(addresses)
+
+    train, test = train_test_split(addresses, shuffle=True, random_state=42, test_size=0.15)
+    train, val = train_test_split(train, shuffle=True, random_state=42, test_size=0.15)
+
+    for song_path, genre, song in train:
+        os.makedirs(os.path.join(save_folder + '/train', genre), exist_ok=True)
+        chunk_and_save(save_folder=save_folder + '/train', song_path=song_path, genre=genre, song=song)
+
+    for song_path, genre, song in test:
+        os.makedirs(os.path.join(save_folder + '/test', genre), exist_ok=True)
+        chunk_and_save(save_folder=save_folder + '/test', song_path=song_path, genre=genre, song=song)
+
+    for song_path, genre, song in val:
+        os.makedirs(os.path.join(save_folder + '/validation', genre), exist_ok=True)
+        chunk_and_save(save_folder=save_folder + '/validation', song_path=song_path, genre=genre, song=song)
+
+
+def chunk_and_save(song_path, chunk_length_ms=3000, save_folder=None, genre=None, song=None):
+    audio = AudioSegment.from_file(song_path, "wav")
+    chunks = make_chunks(audio, chunk_length_ms)
+    for i, chunk in enumerate(chunks):
+        chunk_name = save_folder + '/' + genre + '/' + song.split('.wav')[0] + "_chunk{0}.wav".format(i)
+        chunk.export(chunk_name, format="wav")
 
 
 if __name__ == '__main__':
-    # create_dataset()
-    audio_clips()
+    create_dataset(genre_folder='../data/dataset/slice3s/validation', save_folder='../data/np_data/slice3s/validation')
+    # audio_clips()
     # plt.imshow(img)
     # plt.savefig('tests.png', bbox_inches='tight', pad_inches=0)
     # plt.show()
