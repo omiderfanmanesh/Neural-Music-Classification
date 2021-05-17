@@ -1,0 +1,117 @@
+import os
+from os.path import dirname, join as pjoin
+import pathlib
+import numpy as np
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
+import random
+
+def get_spectrogram_from_wav(dir):
+    """It converts wav file to spectrogram using the save_spectrogram_in_folders function
+    It creates the split of the songs in train/test/validation"""
+    current_dir = f"genres_original/{dir}"
+    list_of_wav = os.listdir(current_dir)
+    random.seed(2021)
+    list_of_wav = random.sample(list_of_wav, len(list_of_wav))
+    dir_to_training = "basedmodel/genres_spectrogram_training"
+    dir_to_test = "basedmodel/genres_spectrogram_test"
+    dir_to_val = "basedmodel/genres_spectrogram_validation"
+    j = 0
+    for wav in list_of_wav:
+        if j <= 80:
+            save_spectrogram_in_folders(current_dir, wav, dir_to_training, dir)
+            j += 1
+        elif 80 < j <= 90:
+            save_spectrogram_in_folders(current_dir, wav, dir_to_test, dir)
+            j += 1
+        elif 90 < j <= 100:
+            save_spectrogram_in_folders(current_dir, wav, dir_to_val, dir)
+            j += 1
+    return None
+
+
+def save_spectrogram_in_folders(current_dir, wav, second_directory, dir):
+    """"
+
+    Checks the files have the wav extension and
+    use the save_wav_to_spectrogram function
+    to convert wav to spectrogram
+
+    Parameters:
+        current_dir: the path to the current genre of wav files
+        wav: a single wav contained in the current_dir
+        second_directory: directory where the numpy array will be saved
+        dir: the directory of the genre on which computing the split
+
+    """
+    if wav[-3:] == "wav":
+        wav_file_path = pjoin(current_dir, wav)
+        newpath = pjoin(second_directory, f"{dir}")
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        save_wav_to_spectrogram(wav, newpath, wav_file_path)
+    return None
+
+
+def save_wav_to_spectrogram(wav, newpath, wav_file_path):
+    """"
+
+    Creates a list of parameters which will be passed in parallel to the spectrogram_to_jpg function
+
+    Parameters:
+        wav: a single wav contained in the current_dir
+        newpath: the path to the folder where the numpy array will be saved
+        wav_file_path: the path to a single wav contained in the current_dir
+
+    """
+
+    spectrogram_file = wav[:-3]
+    spectrogram_split = spectrogram_file.split(".")
+    spectrogram_file = spectrogram_split[0] + "_" + spectrogram_split[1]
+
+    max_iteration = 28
+    for sec in np.arange(0, max_iteration, 3):
+        spectrogram_file_path_with_sec = pjoin(newpath,
+                                               f"{spectrogram_file}_Sec{sec}")
+        if pathlib.Path(spectrogram_file_path_with_sec + ".npy").is_file():
+           pass
+        else:
+            spectrogram_to_npy(sec, wav_file_path, spectrogram_file_path_with_sec)
+    return None
+
+
+def spectrogram_to_npy(sec, wav_file_path, spectrogram_file_path_with_sec, ):
+    """
+    It creates 10 non-overlapping audio clips of lenght of 3 seconds
+    and it saves them as numpy array.
+
+    Parameters:
+        sec = the offset of the librosa.load function
+        wav_file_path = the path to the wav file
+        spectrogram_file_path_with_sec = the path to where the numpy array will be saved
+    """
+
+    y, samplerate = librosa.load(wav_file_path, sr=16000, offset=sec, duration=3)
+    #print(y)
+    spec = librosa.feature.melspectrogram(y, sr=samplerate, n_fft=2048, hop_length=512, n_mels=128)
+    spec = librosa.power_to_db(spec, ref=1)
+
+    # plt.figure()
+    # librosa.display.specshow(spec)
+    # plt.colorbar()
+    # plt.show()
+
+
+    np.save(spectrogram_file_path_with_sec, spec)
+
+    print(spectrogram_file_path_with_sec)
+
+
+if __name__ == "__main__":
+    #torch.manual_seed(16000)
+    np.random.seed(16000)
+    #random.seed(16000)
+    folders = sorted(os.listdir(r"genres_original"))
+    for folder in folders:
+        get_spectrogram_from_wav(folder)
