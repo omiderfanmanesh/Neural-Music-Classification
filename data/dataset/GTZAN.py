@@ -75,7 +75,7 @@ class GTZANDataset(Dataset):
                 'rock': 9
             }
             sample = self.samples[index]
-            sample = np.expand_dims(sample, axis=0)
+            # sample = np.expand_dims(sample, axis=0)
             sample = torch.from_numpy(sample)
             label = self.labels[index]
             label = label_map[label]
@@ -88,8 +88,8 @@ class GTZANDataset(Dataset):
                                                hop_length=self.hop_length)
 
             sample = librosa.amplitude_to_db(S, ref=1.0)
-            sample = np.expand_dims(sample, axis=0)
-            sample = pad_along_axis(sample, 1024, axis=2)
+            # sample = np.expand_dims(sample, axis=0)
+            sample = pad_along_axis(sample, 128, axis=2)
             # print(sample.shape)
             sample = torch.from_numpy(sample)
 

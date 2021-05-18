@@ -29,14 +29,14 @@ _C.DATALOADER = CN()
 _C.DATALOADER.NUM_WORKERS = 2
 _C.DATALOADER.DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original'
 
-_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train/samples_train.npy'
-_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train/labels_train.npy'
+_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train/samples_train_aug.npy'
+_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train/labels_train_aug.npy'
 
-_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/samples_test.npy'
-_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/labels_test.npy'
+_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/samples_test_aug.npy'
+_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/labels_test_aug.npy'
 
-_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation/samples_val.npy'
-_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation/labels_val.npy'
+_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation/samples_val_aug.npy'
+_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation/labels_val_aug.npy'
 
 _C.DATALOADER.LOAD_FROM_NUMPY = True
 _C.DATALOADER.ONE_HOT_ENCODING = True

@@ -6,7 +6,7 @@ import logging
 import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
-from ignite.handlers import ModelCheckpoint, Timer
+from ignite.handlers import ModelCheckpoint, Timer, EarlyStopping
 from ignite.metrics import Accuracy, Loss, RunningAverage, Fbeta
 from ignite.metrics.precision import Precision
 from ignite.metrics.recall import Recall
@@ -71,6 +71,13 @@ def do_train(
 
     pbar = ProgressBar(persist=True, bar_format="")
     pbar.attach(trainer)
+
+    def score_function(engine):
+        val_loss = engine.state.metrics['f1']
+        return -val_loss
+
+    early_stopping_handler = EarlyStopping(patience=10, score_function=score_function, trainer=trainer)
+    evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(engine):

@@ -19,6 +19,7 @@ np.random.seed(42)
 
 from pydub import AudioSegment
 from pydub.utils import make_chunks
+from utils.spec_augment import freq_mask, time_mask, time_warp
 
 
 # matplotlib.use('Agg') # No pictures displayed
@@ -347,8 +348,52 @@ def chunk_and_save(song_path, chunk_length_ms=3000, save_folder=None, genre=None
         chunk.export(chunk_name, format="wav")
 
 
+def augmentation(sample_address, label_address):
+    samples = np.load(sample_address)
+    labels = np.load(label_address)
+
+    new_samples = []
+    new_labels = []
+    for s, l in tqdm(zip(samples, labels)):
+        s = np.expand_dims(s, axis=0)
+
+        new_samples.append(s)
+        new_labels.append(l)
+
+        s = torch.from_numpy(s)
+
+        s_time_mask = time_mask(s.clone())
+        new_samples.append(s_time_mask.numpy())
+        new_labels.append(l)
+
+        s_time_wrap = time_warp(s.clone())
+        new_samples.append(s_time_wrap.numpy())
+        new_labels.append(l)
+
+        s_freq_mask = freq_mask(s.clone())
+        new_samples.append(s_freq_mask.numpy())
+        new_labels.append(l)
+
+        combined = time_mask(freq_mask(time_warp(s.clone()), num_masks=2),
+                             num_masks=2)
+        new_samples.append(combined.numpy())
+        new_labels.append(l)
+
+    new_samples = np.array(new_samples)
+    new_labels = np.array(new_labels)
+
+    # samples = np.concatenate((samples,new_samples))
+    # labels = np.concatenate((labels, new_labels))
+
+    np.save('../data/dataset/slice3s/test/samples_test_aug.npy', new_samples)
+    np.save('../data/dataset/slice3s/test/labels_test_aug.npy', new_labels)
+
+
 if __name__ == '__main__':
-    create_dataset(genre_folder='../data/dataset/slice3s/validation', save_folder='../data/np_data/slice3s/validation')
+    augmentation(
+        sample_address='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/samples_test.npy',
+        label_address='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/labels_test.npy')
+    # create_dataset(genre_folder='../data/dataset/slice3s/validation', save_folder='../data/np_data/slice3s/validation')
     # audio_clips()
     # plt.imshow(img)
     # plt.savefig('tests.png', bbox_inches='tight', pad_inches=0)
