@@ -1,13 +1,18 @@
 # Export
 
 # Export
-import random
-
-import torch
 # Export
 import random
 
 import torch
+from pydub.generators import WhiteNoise
+
+
+def add_noise(sound):
+    noise = WhiteNoise().to_audio_segment(duration=len(sound))
+
+    combined = sound.overlay(noise)
+    return combined
 
 
 # Export

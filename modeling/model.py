@@ -5,9 +5,9 @@ import torch.nn.functional as F
 print('cuda', torch.cuda.is_available())
 
 
-class MusicClassification(nn.Module):
+class MusicClassificationCRNN(nn.Module):
     def __init__(self, cfg):
-        super(MusicClassification, self).__init__()
+        super(MusicClassificationCRNN, self).__init__()
         num_class = cfg.MODEL.NUM_CLASSES
 
         self.np_layers = 4
@@ -47,76 +47,85 @@ class MusicClassification(nn.Module):
         self.dense = nn.Linear(32, num_class)
         # self.softmax = nn.Softmax(dim=1)
 
+        # self.noise = GaussianNoise()
+
     def forward(self, x):
-        # x [16, 1, 128,938]
+        # x [16, 1, 128,1024]
         x = self.bn0(x)
-        # x [16, 1, 128,938]
+        # x [16, 1, 128,1024]
         x = F.pad(x, (0, 0, 2, 1))
-        # x [16, 1, 131,938]
+        # x [16, 1, 131,1024]
         x = self.conv1(x)
-        # x [16, 64, 129,936]
+        # x [16, 64, 129,1022]
         x = self.activation(x)
-        # x [16, 64, 129,936]
+        # x [16, 64, 129,1022]
         x = self.bn1(x)
-        # x [16, 64, 129,936]
+        # x [16, 64, 129,1022]
         x = self.max_pool_2_2(x)
-        # x [16, 64, 64,468]
+        # x [16, 64, 64,511]
         x = self.drop_01(x)
-        # x [16, 64, 64,468]
+        # x [16, 64, 64,511]
         x = F.pad(x, (0, 0, 2, 1))
-        # x [16, 64, 67,468]
+        # x [16, 64, 67,511]
         x = self.conv2(x)
-        # x [16, 128, 65,466]
+        # x [16, 128, 65,509]
         x = self.activation(x)
-        # x [16, 128, 65,466]
+        # x [16, 128, 65,509]
         x = self.bn2(x)
-        # x [16, 128, 65,455]
+        # x [16, 128, 65,509]
         x = self.max_pool_4_2(x)
-        # x [16, 128, 16,233]
+        # x [16, 128, 16,254]
         x = self.drop_01(x)
-        # x [16, 128, 16,233]
+        # x [16, 128, 16,254]
         x = F.pad(x, (0, 0, 2, 1))
-        # x [16, 128, 19,233]
+        # x [16, 128, 19,254]
         x = self.conv3(x)
-        # x [16, 128, 17,231]
+        # x [16, 128, 17,252]
         x = self.activation(x)
-        # x [16, 128, 17,231]
+        # x [16, 128, 17,252]
         x = self.bn3(x)
-        # x [16, 128, 17,231]
+        # x [16, 128, 17,252]
         x = self.max_pool_4_2(x)
-        # x [16, 128, 4,115]
+        # x [16, 128, 4,126]
         x = self.drop_01(x)
-        # x [16, 128, 4,115]
+        # x [16, 128, 4,126]
         x = F.pad(x, (0, 0, 2, 1))
-        # x [16, 128, 7,115]
+        # x [16, 128, 7,126]
         x = self.conv4(x)
-        # x [16, 128, 5,113]
+        # x [16, 128, 5,124]
         x = self.activation(x)
-        # x [16, 128, 5,113]
+        # x [16, 128, 5,124]
         x = self.bn4(x)
-        # x [16, 128, 5,113]
+        # x [16, 128, 5,124]
         x = self.max_pool_4_2(x)
-        # x [16, 128, 1,56]
+        # x [16, 128, 1,62]
         x = self.drop_01(x)
-        # x [16, 128, 1,56]
+        # x [16, 128, 1,62]
 
         x = x.permute(0, 3, 1, 2)
-        # x [16, 56, 128,1]
+        # x [16, 62, 128,1]
         resize_shape = list(x.shape)[2] * list(x.shape)[3]
-        # x [16, 128, 56,1], reshape size is 128
+        # x [16, 62,128,1], reshape size is 128
         x = torch.reshape(x, (list(x.shape)[0], list(x.shape)[1], resize_shape))
-        # x [16, 56, 128]
+        # x [16, 62, 128]
         device = torch.device("cuda" if torch.cuda.is_available()
                               else "cpu")
         h0 = torch.zeros((1, x.size(0), 32)).to(device)
         x, h1 = self.gru1(x, h0)
-        # x [16, 56, 32]
+        # x [16, 62, 32]
         x, _ = self.gru2(x, h1)
-        # x [16, 56, 32]
+        # x [16, 62, 32]
         x = x[:, -1, :]
+        # x [16,32]
         x = self.dense(x)
         # x [16,10]
         # x = self.softmax(x)
         # x [16, 10]
         # x = torch.argmax(x, 1)
         return x
+
+
+def add_noise_to_weights(m):
+    with torch.no_grad():
+        if hasattr(m, 'weight'):
+            m.weight.add_(torch.randn(m.weight.size()) * 0.1)

@@ -25,7 +25,7 @@ import torch
 
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
-
+torch.cuda.empty_cache()
 import numpy as np
 
 np.random.seed(SEED)

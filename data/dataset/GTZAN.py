@@ -48,11 +48,10 @@ class GTZANDataset(Dataset):
             self.samples, self.labels = self.load_from_np()
         else:
             self.samples, self.labels = self.extract_address()
-
-        self.sr = cfg.DATALOADER.SR
-        self.n_mels = cfg.DATALOADER.N_MELS
-        self.n_fft = cfg.DATALOADER.N_FFT
-        self.hop_length = cfg.DATALOADER.HOP_LENGTH
+            self.sr = cfg.DATALOADER.SR
+            self.n_mels = cfg.DATALOADER.N_MELS
+            self.n_fft = cfg.DATALOADER.N_FFT
+            self.hop_length = cfg.DATALOADER.HOP_LENGTH
 
         self.transform = transforms
         self.le = LabelEncoder()
@@ -75,7 +74,10 @@ class GTZANDataset(Dataset):
                 'rock': 9
             }
             sample = self.samples[index]
-            # sample = np.expand_dims(sample, axis=0)
+            # sample = add_noise(signal=sample)
+            sample = np.expand_dims(sample, axis=0)
+            # if sample.shape[2] != 1024:
+            #     sample = pad_along_axis(sample, 1024, axis=2)
             sample = torch.from_numpy(sample)
             label = self.labels[index]
             label = label_map[label]

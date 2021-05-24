@@ -29,14 +29,14 @@ _C.DATALOADER = CN()
 _C.DATALOADER.NUM_WORKERS = 2
 _C.DATALOADER.DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original'
 
-_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train/samples_train_aug.npy'
-_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train/labels_train_aug.npy'
+_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/train_noisy/samples_train_noisy.npy'
+_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/train_noisy/labels_train_noisy.npy'
 
-_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/samples_test_aug.npy'
-_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/labels_test_aug.npy'
+_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/test/samples_test.npy'
+_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/test/labels_test.npy'
 
-_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation/samples_val_aug.npy'
-_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation/labels_val_aug.npy'
+_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/validation/samples_val.npy'
+_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/validation/labels_val.npy'
 
 _C.DATALOADER.LOAD_FROM_NUMPY = True
 _C.DATALOADER.ONE_HOT_ENCODING = True
@@ -65,8 +65,15 @@ _C.OPT.ADAM.OPTIMIZER_NAME = "ADAM"
 _C.OPT.ADAM.LR = 0.0001  # DEFAULT  0.001
 _C.OPT.ADAM.BETAS = [0.9, 0.999]  # DEFAULT [0.9, 0.999]
 _C.OPT.ADAM.EPS = 1e-08  # DEFAULT 1e-08
-_C.OPT.ADAM.WEIGHT_DECAY = 0  # DEFAULT 0
+_C.OPT.ADAM.WEIGHT_DECAY = 1e-5  # DEFAULT 0
 _C.OPT.ADAM.AMS_GRAD = False  # DEFAULT FALSE
+
+# ------------------------------------------------------------------------------ #
+_C.OPT.ADADELTA = CN()
+_C.OPT.ADADELTA.OPTIMIZER_NAME = "ADADELTA"
+_C.OPT.ADADELTA.LR = 0.0001  # DEFAULT  0.001
+_C.OPT.ADADELTA.EPS = 1e-08  # DEFAULT 1e-08
+_C.OPT.ADADELTA.WEIGHT_DECAY = 1e-5  # DEFAULT 0
 
 # ------------------------------------------------------------------------------ #
 
@@ -90,7 +97,7 @@ _C.SOLVER.IMS_PER_BATCH = 16
 # This is global, so if we have 8 GPUs and IMS_PER_BATCH = 16, each GPU will
 # see 2 images per batch
 _C.TEST = CN()
-_C.TEST.IMS_PER_BATCH = 64
+_C.TEST.IMS_PER_BATCH = 16
 _C.TEST.WEIGHT = ""
 
 # ---------------------------------------------------------------------------- #

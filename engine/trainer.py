@@ -58,6 +58,7 @@ def do_train(
                                                             'recall': recall,
                                                             'f1': F1,
                                                             'ce_loss': Loss(loss_fn)}, device=device)
+
     checkpointer = ModelCheckpoint(output_dir, 'music', n_saved=10, require_empty=False)
     timer = Timer(average=True)
 
@@ -73,7 +74,7 @@ def do_train(
     pbar.attach(trainer)
 
     def score_function(engine):
-        val_loss = engine.state.metrics['f1']
+        val_loss = engine.state.metrics['ce_loss']
         return -val_loss
 
     early_stopping_handler = EarlyStopping(patience=10, score_function=score_function, trainer=trainer)
@@ -85,7 +86,7 @@ def do_train(
 
         if iter % log_period == 0:
             logger.info("Epoch[{}] Iteration[{}/{}] Loss: {:.2f}"
-                        .format(engine.state.epoch, iter, len(train_loader), engine.state.metrics['avg_loss']))
+                        .format(engine.state.epoch, iter, len(train_loader), engine.state.metrics['ce_loss']))
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):

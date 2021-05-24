@@ -27,7 +27,7 @@ def main():
 
     model = build_model(cfg)
     model.load_state_dict(torch.load(cfg.TEST.WEIGHT))
-    val_loader = make_data_loader(cfg, is_train=False)
+    val_loader = make_data_loader(cfg)
 
     inference(cfg, model, val_loader)
 

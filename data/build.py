@@ -3,7 +3,6 @@
 from torch.utils import data
 
 from .dataset.GTZAN import GTZANDataset
-from .transforms import build_transforms
 
 
 def build_dataset(cfg, transforms):
@@ -14,8 +13,8 @@ def build_dataset(cfg, transforms):
 
 
 def make_data_loader(cfg, test_size=0.10, validation_size=0.10, shuffle=True):
-    transforms = build_transforms(cfg)
-    train_dataset, validation_dataset, test_dataset = build_dataset(cfg=cfg, transforms=transforms)
+    # transforms = build_transforms(cfg)
+    train_dataset, validation_dataset, test_dataset = build_dataset(cfg=cfg, transforms=None)
 
     # dataset_size = len(datasets)
     # test_size = int(test_size * dataset_size)
@@ -38,11 +37,11 @@ def make_data_loader(cfg, test_size=0.10, validation_size=0.10, shuffle=True):
     )
 
     test_data_loader = data.DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
+        test_dataset, batch_size=8, shuffle=False, num_workers=num_workers
     )
 
     validation_data_loader = data.DataLoader(
-        validation_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
+        validation_dataset, batch_size=8, shuffle=False, num_workers=num_workers
     )
 
     return train_data_loader, test_data_loader, validation_data_loader
