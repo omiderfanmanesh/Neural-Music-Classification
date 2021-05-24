@@ -29,14 +29,14 @@ _C.DATALOADER = CN()
 _C.DATALOADER.NUM_WORKERS = 2
 _C.DATALOADER.DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original'
 
-_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/train_noisy/samples_train_noisy.npy'
-_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/train_noisy/labels_train_noisy.npy'
+_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '../data/dataset/np_data/train/samples_train_entire_songs.npy'
+_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '../data/dataset/np_data/train/labels_trian_entire_songs.npy'
 
-_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/test/samples_test.npy'
-_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/test/labels_test.npy'
+_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '../data/dataset/np_data/test/samples_test.npy'
+_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '../data/dataset/np_data/test/labels_test.npy'
 
-_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/validation/samples_val.npy'
-_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/np_data/validation/labels_val.npy'
+_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '../data/dataset/np_data/validation/samples_val.npy'
+_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '../data/dataset/np_data/validation/labels_val.npy'
 
 _C.DATALOADER.LOAD_FROM_NUMPY = True
 _C.DATALOADER.ONE_HOT_ENCODING = True
