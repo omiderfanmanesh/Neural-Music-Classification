@@ -132,3 +132,8 @@ dmypy.json
 /data/dataset/slice3s/
 /data/dataset/slice3s/
 /modeling/
+/data/dataset/sub-data/
+/data/dataset/np_data/
+/data/dataset/sub-data/
+/outputs/
+/data/dataset/artist20/

@@ -4,8 +4,65 @@
 # Export
 import random
 
+import numpy as np
 import torch
 from pydub.generators import WhiteNoise
+from tqdm import tqdm
+
+
+def rand_aug_sample(sample):
+    aug = np.random.randint(0, 4)
+
+    if aug == 0:
+        new_spec = time_warp(spec=sample)
+    elif aug == 1:
+        new_spec = time_mask(spec=sample)
+    elif aug == 2:
+        new_spec = freq_mask(spec=sample)
+    else:
+        new_spec = sample
+
+    return new_spec
+
+
+def rand_aug(sample_address, label_address, save_folder, sample_save_name, label_save_name, save_as_np=True):
+    data = np.load(sample_address)
+    label = np.load(label_address)
+    aug_data = []
+    aug_label = []
+
+    for d, l in tqdm(zip(data, label)):
+
+        s = np.expand_dims(d, axis=0)
+        s = torch.from_numpy(s)
+        aug = np.random.randint(0, 3)
+        new_spec = None
+
+        if aug == 0:
+            new_spec = time_warp(spec=s)
+        elif aug == 1:
+            new_spec = time_mask(spec=s)
+        elif aug == 2:
+            new_spec = freq_mask(spec=s)
+
+        print(new_spec.size(), l)
+        new_spec = new_spec.numpy()
+
+        aug_data.append(new_spec)
+        aug_label.append(l)
+
+        aug_data.append(s.numpy())
+        aug_label.append(l)
+
+    samples = np.array(aug_data)
+    labels = np.array(aug_label)
+
+    if save_as_np:
+        f_sample = save_folder + sample_save_name
+        f_label = save_folder + label_save_name
+
+        np.save(f_sample, samples)
+        np.save(f_label, labels)
 
 
 def add_noise(sound):

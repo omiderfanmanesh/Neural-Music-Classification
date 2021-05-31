@@ -10,7 +10,7 @@ import torchaudio
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
-from utils.util import pad_along_axis
+from utils.dataset_helper import pad_along_axis
 
 print(torch.__version__)
 print(torchaudio.__version__)
@@ -27,7 +27,7 @@ import pathlib
 print(pathlib.Path().absolute())
 
 
-class GTZANDataset(Dataset):
+class Artist20(Dataset):
     def __init__(self, cfg, transforms, training_type=0):
 
         self.load_from_numpy = cfg.DATALOADER.LOAD_FROM_NUMPY
@@ -62,25 +62,37 @@ class GTZANDataset(Dataset):
     def __getitem__(self, index):
         if self.load_from_numpy:
             label_map = {
-                'blues': 0,
-                'classical': 1,
-                'country': 2,
-                'disco': 3,
-                'hiphop': 4,
-                'jazz': 5,
-                'metal': 6,
-                'pop': 7,
-                'reggae': 8,
-                'rock': 9
+                'aerosmith': 0,
+                'beatles': 1,
+                'creedence_clearwater_revival': 2,
+                'cure': 3,
+                'dave_matthews_band': 4,
+                'depeche_mode': 5,
+                'fleetwood_mac': 6,
+                'garth_brooks': 7,
+                'green_day': 8,
+                'led_zeppelin': 9,
+                'madonna': 10,
+                'metallica': 11,
+                'prince': 12,
+                'queen': 13,
+                'radiohead': 14,
+                'roxette': 15,
+                'steely_dan': 16,
+                'suzanne_vega': 17,
+                'tori_amos': 18,
+                'u2': 19
             }
+
             sample = self.samples[index]
-            # sample = add_noise(signal=sample)
-            sample = np.expand_dims(sample, axis=0)
-            # if sample.shape[2] != 1024:
-            #     sample = pad_along_axis(sample, 1024, axis=2)
+            sample = sample.reshape((1, sample.shape[0], sample.shape[1]))
+
             sample = torch.from_numpy(sample)
+            # sample = rand_aug_sample(sample)
             label = self.labels[index]
-            label = label_map[label]
+            label = np.argmax(label)
+            # print(sample.shape,label)
+            # label = label_map[label]
         else:
             address = self.samples[index]
             y, sr = librosa.load(address, sr=self.sr)
