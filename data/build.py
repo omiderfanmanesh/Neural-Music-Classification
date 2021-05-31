@@ -2,13 +2,18 @@
 
 from torch.utils import data
 
-from .dataset.GTZAN import GTZANDataset
+from .dataset import Artist20
 
 
 def build_dataset(cfg, transforms):
-    train_dataset = GTZANDataset(cfg=cfg, training_type=0, transforms=transforms)
-    validation_dataset = GTZANDataset(cfg=cfg, training_type=1, transforms=transforms)
-    test_dataset = GTZANDataset(cfg=cfg, training_type=2, transforms=transforms)
+    # train_dataset = GTZAN(cfg=cfg, training_type=0, transforms=transforms)
+    # validation_dataset = GTZAN(cfg=cfg, training_type=1, transforms=transforms)
+    # test_dataset = GTZAN(cfg=cfg, training_type=2, transforms=transforms)
+
+    train_dataset = Artist20(cfg=cfg, training_type=0, transforms=transforms)
+    validation_dataset = Artist20(cfg=cfg, training_type=1, transforms=transforms)
+    test_dataset = Artist20(cfg=cfg, training_type=2, transforms=transforms)
+
     return train_dataset, validation_dataset, test_dataset
 
 

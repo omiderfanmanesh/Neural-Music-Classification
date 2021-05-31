@@ -2,6 +2,7 @@
 
 
 import logging
+import os
 
 import torch
 from ignite.contrib.handlers import ProgressBar
@@ -21,11 +22,12 @@ def do_train(
         scheduler,
         loss_fn,
 ):
+    model_name = cfg.MODEL.NAME
     log_period = cfg.SOLVER.LOG_PERIOD
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
     output_dir = cfg.OUTPUT_DIR
     device = cfg.MODEL.DEVICE
-    device = torch.device("cuda")
+    device = torch.device(device=device)
     epochs = cfg.SOLVER.MAX_EPOCHS
 
     model = model.to(device)
@@ -33,24 +35,10 @@ def do_train(
     logger = logging.getLogger("template_model.train")
     logger.info("Start training")
 
-    # precision = Precision(average=True,device=device)
-    # recall = Recall(average=True,device=device)
-    # F1 = precision * recall * 2 / (precision + recall + 1e-20)
-
     precision = Precision(average=False)
     recall = Recall(average=False)
     # F1 = (precision * recall * 2 / (precision + recall)).mean()
     F1 = Fbeta(beta=1.0, average=False, precision=precision, recall=recall)
-
-    def output_transform(output):
-        # `output` variable is returned by above `process_function`
-        y_pred = output[0]
-        y_pred = torch.argmax(y_pred, dim=1)
-        # y = output[1].cpu().numpy()
-        # y = np.identity(10)[y]
-        # y = torch.from_numpy(y)
-        y = output[1]
-        return y_pred, y  # output format is according to `Accuracy` docs
 
     trainer = create_supervised_trainer(model, optimizer, loss_fn, device=device)
     evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(),
@@ -59,11 +47,11 @@ def do_train(
                                                             'f1': F1,
                                                             'ce_loss': Loss(loss_fn)}, device=device)
 
-    checkpointer = ModelCheckpoint(output_dir, 'music', n_saved=10, require_empty=False)
+    checkpointer = ModelCheckpoint(output_dir, model_name, n_saved=5, require_empty=False)
     timer = Timer(average=True)
 
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpointer, {'model': model,
-                                                                     'optimizer': optimizer})
+    # trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpointer, {'model': model,
+    #                                                                  'optimizer': optimizer})
 
     timer.attach(trainer, start=Events.EPOCH_STARTED, resume=Events.ITERATION_STARTED,
                  pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED)
@@ -86,7 +74,7 @@ def do_train(
 
         if iter % log_period == 0:
             logger.info("Epoch[{}] Iteration[{}/{}] Loss: {:.2f}"
-                        .format(engine.state.epoch, iter, len(train_loader), engine.state.metrics['ce_loss']))
+                        .format(engine.state.epoch, iter, len(train_loader), engine.state.metrics['avg_loss']))
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
@@ -141,5 +129,36 @@ def do_train(
                     .format(engine.state.epoch, timer.value() * timer.step_count,
                             train_loader.batch_size / timer.value()))
         timer.reset()
+
+    def get_saved_model_path(epoch):
+        return f'models/Model_{model_name}_{epoch}.pth'
+
+    best_loss = 0.
+    best_epoch = 1
+    best_epoch_file = ''
+
+    @trainer.on(Events.EPOCH_COMPLETED)
+    def save_best_epoch_only(engine):
+        epoch = engine.state.epoch
+
+        global best_loss
+        global best_epoch
+        global best_epoch_file
+        best_loss = 0. if epoch == 1 else best_loss
+        best_epoch = 1 if epoch == 1 else best_epoch
+        best_epoch_file = '' if epoch == 1 else best_epoch_file
+
+        metrics = evaluator.run(val_loader).metrics
+
+        if metrics['ce_loss'] < best_loss:
+            prev_best_epoch_file = get_saved_model_path(best_epoch)
+            if os.path.exists(prev_best_epoch_file):
+                os.remove(prev_best_epoch_file)
+
+            best_loss = metrics['ce_loss']
+            best_epoch = epoch
+            best_epoch_file = get_saved_model_path(best_epoch)
+            print(f'\nEpoch: {best_epoch} - Loss is improved! Loss: {best_loss}\n\n\n')
+            torch.save(model.state_dict(), best_epoch_file)
 
     trainer.run(train_loader, max_epochs=epochs)
