@@ -105,3 +105,5 @@ _C.TEST.WEIGHT = ""
 # Misc options
 # ---------------------------------------------------------------------------- #
 _C.OUTPUT_DIR = "../outputs"
+_C.TENSORBOARD_LOG = '../outputs/tensorboard_log'
+_C.BEST_MODEL = '../outputs/best_model'

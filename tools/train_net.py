@@ -5,8 +5,6 @@ import os
 import sys
 from os import mkdir
 
-import torch.nn.functional as F
-
 sys.path.append('.')
 from config import cfg
 from data import make_data_loader
@@ -22,7 +20,7 @@ SEED = 2021
 random.seed(SEED)
 
 import torch
-
+import torch.nn as nn
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 torch.cuda.empty_cache()
@@ -44,7 +42,7 @@ def train(cfg):
 
     train_loader, test_loader, val_loader = make_data_loader(cfg)
 
-    criterion = F.cross_entropy
+    criterion = nn.CrossEntropyLoss()
 
     do_train(
         cfg,
