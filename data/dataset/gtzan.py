@@ -91,7 +91,9 @@ class GTZAN(Dataset):
             #     sample = pad_along_axis(sample, 128, axis=2)
             if sample.shape[2] < 100:
                 sample = sample[:, :, :91]
-            print(sample.shape)
+            else:
+                sample = sample[:, :, :911]
+            # print(sample.shape)
             sample = torch.from_numpy(sample)
             # sample = rand_aug_sample(sample)
             label = self.labels[index]

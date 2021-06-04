@@ -1,13 +1,10 @@
-# encoding: utf-8
-"""
-@author:  sherlock
-@contact: sherlockliao01@gmail.com
-"""
 import logging
 
 from ignite.engine import Events
 from ignite.engine import create_supervised_evaluator
-from ignite.metrics import Accuracy
+from ignite.metrics import Accuracy, Fbeta
+from ignite.metrics.precision import Precision
+from ignite.metrics.recall import Recall
 
 
 def inference(
@@ -19,8 +16,14 @@ def inference(
 
     logger = logging.getLogger("template_model.inference")
     logger.info("Start inferencing")
-    evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy()},
-                                            device=device)
+
+    precision = Precision(average=False)
+    recall = Recall(average=False)
+    F1 = Fbeta(beta=1.0, average=False, precision=precision, recall=recall)
+    evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(),
+                                                            'precision': precision,
+                                                            'recall': recall,
+                                                            'f1': F1}, device=device)
 
     # adding handlers using `evaluator.on` decorator API
     @evaluator.on(Events.EPOCH_COMPLETED)

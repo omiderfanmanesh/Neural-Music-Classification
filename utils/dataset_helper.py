@@ -19,7 +19,7 @@ np.random.seed(42)
 import soundfile as sf
 from pydub import AudioSegment
 from pydub.utils import make_chunks
-from utils.augmentation import freq_mask, time_mask, time_warp, rand_aug
+from utils.augmentation import freq_mask, time_mask, time_warp
 
 
 # matplotlib.use('Agg') # No pictures displayed
@@ -241,24 +241,24 @@ def plot_spec(file_address, sr=16000, n_mels=128,
 
 
 if __name__ == '__main__':
-    rand_aug(sample_address='../data/dataset/np_data/train/sample_train_rand_aug.npy',
-             label_address='../data/dataset/np_data/train/label_train_rand_aug.npy',
-             save_folder='../data/dataset/np_data/train/',
-             sample_save_name='sample_train_rand_aug.npy',
-             label_save_name='label_train_rand_aug.npy')
+    # rand_aug(sample_address='../data/dataset/np_data/train/sample_train_rand_aug.npy',
+    #          label_address='../data/dataset/np_data/train/label_train_rand_aug.npy',
+    #          save_folder='../data/dataset/np_data/train/',
+    #          sample_save_name='sample_train_rand_aug.npy',
+    #          label_save_name='label_train_rand_aug.npy')
     # plot_spec(file_address='../data/dataset/slice3s/train_pitch_shift/classical/classical.00000_pitch_shift.wav')
     # create_noisy_dataset(
     #     src='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train',
     #     dst='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train_polarity_inv')
-    # audio_clips(src='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train',
-    #             dst='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/train3s')
+    # audio_clips(src='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation',
+    #             dst='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/validation3s')
     # split_dataset()
     # augmentation(
     #     sample_address='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/samples_test.npy',
     #     label_address='/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/slice3s/test/labels_test.npy')
-    # create_npy_dataset(
-    #     genre_folder='../data/dataset/sub-data/validation',
-    #     save_folder='../data/dataset/sub-data',save_file_name='7_class')
+    create_npy_dataset(
+        genre_folder='../data/dataset/slice3s/validation3s',
+        save_folder='../data/dataset/np_data/slice3s/validation', save_file_name='slice_3s')
     # audio_clips()
     # plt.imshow(img)
     # plt.savefig('tests.png', bbox_inches='tight', pad_inches=0)

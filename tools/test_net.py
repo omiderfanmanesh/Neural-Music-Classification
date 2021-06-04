@@ -16,9 +16,9 @@ from utils.logger import setup_logger
 
 
 def main():
-    num_gpus = cfg.NUM_GPU
-
-    output_dir = cfg.OUTPUT_DIR
+    num_gpus = cfg.MODEL.NUM_GPU
+    device = cfg.MODEL.DEVICE
+    output_dir = cfg.DIR.OUTPUT_DIR
     if output_dir and not os.path.exists(output_dir):
         mkdir(output_dir)
 
@@ -26,8 +26,10 @@ def main():
     logger.info("Using {} GPUS".format(num_gpus))
 
     model = build_model(cfg)
-    model.load_state_dict(torch.load(cfg.TEST.WEIGHT))
-    val_loader = make_data_loader(cfg)
+    weight = torch.load(cfg.DIR.BEST_MODEL + cfg.TEST.WEIGHT)
+    model.to(device=device)
+    model.load_state_dict(weight)
+    val_loader = make_data_loader(cfg, inference=True)
 
     inference(cfg, model, val_loader)
 
