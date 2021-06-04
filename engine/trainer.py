@@ -2,8 +2,8 @@
 
 
 import logging
+import os
 
-import ignite.contrib.engines.common as common
 import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
@@ -25,7 +25,7 @@ def do_train(
     model_name = cfg.MODEL.NAME
     log_period = cfg.SOLVER.LOG_PERIOD
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
-    output_dir = cfg.OUTPUT_DIR
+    output_dir = cfg.DIR.OUTPUT_DIR
     device = cfg.MODEL.DEVICE
     device = torch.device(device=device)
     epochs = cfg.SOLVER.MAX_EPOCHS
@@ -62,9 +62,10 @@ def do_train(
     pbar = ProgressBar(persist=True, bar_format="")
     pbar.attach(trainer)
 
+
     def score_function(engine):
         val_loss = engine.state.metrics['ce_loss']
-        return -val_loss
+        return -1 * val_loss
 
     early_stopping_handler = EarlyStopping(patience=10, score_function=score_function, trainer=trainer)
     evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
@@ -83,7 +84,7 @@ def do_train(
 
         metrics = evaluator.state.metrics
 
-        avg_accuracy = metrics['accuracy']
+        _avg_accuracy = metrics['accuracy']
 
         _precision = metrics['precision']
         _precision = torch.mean(_precision)
@@ -98,7 +99,7 @@ def do_train(
 
         logger.info(
             "Training Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f},  "
-            "Avg Loss: {:.3f} ".format(engine.state.epoch, avg_accuracy, precision, recall, _f1, _avg_loss))
+            "Avg Loss: {:.3f} ".format(engine.state.epoch, _avg_accuracy, _precision, _recall, _f1, _avg_loss))
 
     if val_loader is not None:
         @trainer.on(Events.EPOCH_COMPLETED)
@@ -106,7 +107,7 @@ def do_train(
             evaluator.run(val_loader)
             metrics = evaluator.state.metrics
 
-            avg_accuracy = metrics['accuracy']
+            _avg_accuracy = metrics['accuracy']
 
             _precision = metrics['precision']
             _precision = torch.mean(_precision)
@@ -122,7 +123,7 @@ def do_train(
             _avg_loss = metrics['ce_loss']
             logger.info(
                 "Validation Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f}, Avg Loss: {:.3f}"
-                    .format(engine.state.epoch, avg_accuracy, precision, recall, _f1, _avg_loss)
+                    .format(engine.state.epoch, _avg_accuracy, _precision, _recall, _f1, _avg_loss)
             )
 
     # adding handlers using `trainer.on` decorator API
@@ -133,31 +134,35 @@ def do_train(
                             train_loader.batch_size / timer.value()))
         timer.reset()
 
-    common.setup_common_training_handlers(
-        trainer=trainer,
-        to_save={
-            "trainer": trainer, "model": model,
-            "optimizer": optimizer
-        },
-        output_path="checkpoints",
-        save_every_iters=epochs,
-        output_names=['accuracy', 'recall', 'precision', 'f1', 'ce_loss'],
-        with_pbars=True,
-    )
+    def get_saved_model_path(epoch):
+        return f'{cfg.DIR.BEST_MODEL}/Model_{model_name}_{epoch}.pth'
 
-    tb_logger = common.setup_tb_logging(output_path=cfg.TENSORBOARD_LOG, trainer=trainer, optimizers=optimizer,
-                                        evaluators=evaluator)
+    best_loss = 0.
+    best_epoch = 1
+    best_epoch_file = ''
 
-    common.save_best_model_by_val_score(
-        output_path=cfg.BEST_MODEL,
-        evaluator=evaluator,
-        model=model,
-        metric_name="ce_loss",
-        n_saved=2,
-        trainer=trainer,
-        tag="val_loss",
-    )
+    @trainer.on(Events.EPOCH_COMPLETED)
+    def save_best_epoch_only(engine):
+        epoch = engine.state.epoch
+
+        global best_loss
+        global best_epoch
+        global best_epoch_file
+        best_loss = 0. if epoch == 1 else best_loss
+        best_epoch = 1 if epoch == 1 else best_epoch
+        best_epoch_file = '' if epoch == 1 else best_epoch_file
+        metrics = evaluator.run(val_loader).metrics
+        if metrics['ce_loss'] < best_loss:
+            prev_best_epoch_file = get_saved_model_path(best_epoch)
+            if os.path.exists(prev_best_epoch_file):
+                os.remove(prev_best_epoch_file)
+
+            best_loss = metrics['ce_loss']
+            best_epoch = epoch
+            best_epoch_file = get_saved_model_path(best_epoch)
+            print(f'\nEpoch: {best_epoch} - Loss is improved! Loss: {best_loss}\n\n\n')
+            torch.save(model, best_epoch_file)
 
     trainer.run(train_loader, max_epochs=epochs)
-
-    tb_logger.close()
+    torch.save(model.state_dict(), cfg.DIR.FINAL_MODEL + 'final_model_state_dic.pt')
+    torch.save(model, cfg.DIR.FINAL_MODEL + 'final_model.pt')

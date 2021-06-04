@@ -58,9 +58,17 @@ def train(cfg):
 def main():
     num_gpus = 1
 
-    output_dir = cfg.OUTPUT_DIR
+    output_dir = cfg.DIR.OUTPUT_DIR
     if output_dir and not os.path.exists(output_dir):
         mkdir(output_dir)
+
+    best_models = cfg.DIR.BEST_MODEL
+    if best_models and not os.path.exists(best_models):
+        mkdir(best_models)
+
+    tensorboard_log = cfg.DIR.TENSORBOARD_LOG
+    if tensorboard_log and not os.path.exists(tensorboard_log):
+        mkdir(tensorboard_log)
 
     logger = setup_logger("template_model", output_dir, 0)
     logger.info("Using {} GPUS".format(num_gpus))

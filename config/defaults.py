@@ -8,9 +8,11 @@ _C = CN()
 
 _C.MODEL = CN()
 _C.MODEL.DEVICE = 'cuda'
-_C.MODEL.NUM_CLASSES = 20
+_C.MODEL.NUM_CLASSES = 10
 _C.MODEL.NUM_GPU = 1
 _C.MODEL.NAME = 'ARTIST20'
+_C.MODEL.PRE_TRAINED = True
+_C.MODEL.PRE_TRAINED_ADDRESS = '../outputs/best_models/best_model_6_val_loss_ce_loss=0.5245.pt'
 # -----------------------------------------------------------------------------
 # INPUT
 # -----------------------------------------------------------------------------
@@ -30,8 +32,8 @@ _C.DATALOADER = CN()
 _C.DATALOADER.NUM_WORKERS = 2
 _C.DATALOADER.DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original'
 
-_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '../data/dataset/artist20/sample_train_20_94_42.npy'
-_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '../data/dataset/artist20/label_train_20_94_42.npy'
+_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '../data/dataset/np_data/slice3s/train/samples_train_slice_3s.npy'
+_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '../data/dataset/np_data/slice3s/train/labels_train_slice_3s.npy'
 
 _C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '../data/dataset/artist20/sample_test_20_94_42.npy'
 _C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '../data/dataset/artist20/label_test_20_94_42.npy'
@@ -86,7 +88,6 @@ _C.SOLVER = CN()
 
 _C.SOLVER.MAX_EPOCHS = 50
 
-
 _C.SOLVER.CHECKPOINT_PERIOD = 10
 _C.SOLVER.LOG_PERIOD = 100
 
@@ -102,8 +103,10 @@ _C.TEST.IMS_PER_BATCH = 16
 _C.TEST.WEIGHT = ""
 
 # ---------------------------------------------------------------------------- #
-# Misc options
+# Outputs
 # ---------------------------------------------------------------------------- #
-_C.OUTPUT_DIR = "../outputs"
-_C.TENSORBOARD_LOG = '../outputs/tensorboard_log'
-_C.BEST_MODEL = '../outputs/best_model'
+_C.DIR = CN()
+_C.DIR.OUTPUT_DIR = "../outputs/check_pointers"
+_C.DIR.TENSORBOARD_LOG = '../outputs/tensorboard_log'
+_C.DIR.BEST_MODEL = '../outputs/best_models'
+_C.DIR.FINAL_MODEL = '../outputs/final_model'
