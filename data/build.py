@@ -17,7 +17,7 @@ def build_dataset(cfg, transforms):
     return train_dataset, validation_dataset, test_dataset
 
 
-def make_data_loader(cfg, test_size=0.10, validation_size=0.10, shuffle=True):
+def make_data_loader(cfg, inference=False, test_size=0.10, validation_size=0.10, shuffle=True):
     # transforms = build_transforms(cfg)
     train_dataset, validation_dataset, test_dataset = build_dataset(cfg=cfg, transforms=None)
 
@@ -48,5 +48,6 @@ def make_data_loader(cfg, test_size=0.10, validation_size=0.10, shuffle=True):
     validation_data_loader = data.DataLoader(
         validation_dataset, batch_size=8, shuffle=False, num_workers=num_workers
     )
-
+    if inference:
+        return test_data_loader
     return train_data_loader, test_data_loader, validation_data_loader

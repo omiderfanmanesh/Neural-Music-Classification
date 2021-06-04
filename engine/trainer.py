@@ -2,7 +2,6 @@
 
 
 import logging
-import os
 
 import torch
 from ignite.contrib.handlers import ProgressBar
@@ -68,7 +67,7 @@ def do_train(
         return -1 * val_loss
 
     early_stopping_handler = EarlyStopping(patience=10, score_function=score_function, trainer=trainer)
-    evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
+    # evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(engine):
@@ -137,32 +136,32 @@ def do_train(
     def get_saved_model_path(epoch):
         return f'{cfg.DIR.BEST_MODEL}/Model_{model_name}_{epoch}.pth'
 
-    best_loss = 0.
-    best_epoch = 1
-    best_epoch_file = ''
-
-    @trainer.on(Events.EPOCH_COMPLETED)
-    def save_best_epoch_only(engine):
-        epoch = engine.state.epoch
-
-        global best_loss
-        global best_epoch
-        global best_epoch_file
-        best_loss = 0. if epoch == 1 else best_loss
-        best_epoch = 1 if epoch == 1 else best_epoch
-        best_epoch_file = '' if epoch == 1 else best_epoch_file
-        metrics = evaluator.run(val_loader).metrics
-        if metrics['ce_loss'] < best_loss:
-            prev_best_epoch_file = get_saved_model_path(best_epoch)
-            if os.path.exists(prev_best_epoch_file):
-                os.remove(prev_best_epoch_file)
-
-            best_loss = metrics['ce_loss']
-            best_epoch = epoch
-            best_epoch_file = get_saved_model_path(best_epoch)
-            print(f'\nEpoch: {best_epoch} - Loss is improved! Loss: {best_loss}\n\n\n')
-            torch.save(model, best_epoch_file)
+    # best_loss = 0.
+    # best_epoch = 1
+    # best_epoch_file = ''
+    #
+    # @trainer.on(Events.EPOCH_COMPLETED)
+    # def save_best_epoch_only(engine):
+    #     epoch = engine.state.epoch
+    #
+    #     global best_loss
+    #     global best_epoch
+    #     global best_epoch_file
+    #     best_loss = 0. if epoch == 1 else best_loss
+    #     best_epoch = 1 if epoch == 1 else best_epoch
+    #     best_epoch_file = '' if epoch == 1 else best_epoch_file
+    #     metrics = evaluator.run(val_loader).metrics
+    #     if metrics['ce_loss'] < best_loss:
+    #         prev_best_epoch_file = get_saved_model_path(best_epoch)
+    #         if os.path.exists(prev_best_epoch_file):
+    #             os.remove(prev_best_epoch_file)
+    #
+    #         best_loss = metrics['ce_loss']
+    #         best_epoch = epoch
+    #         best_epoch_file = get_saved_model_path(best_epoch)
+    #         print(f'\nEpoch: {best_epoch} - Loss is improved! Loss: {best_loss}\n\n\n')
+    #         torch.save(model, best_epoch_file)
 
     trainer.run(train_loader, max_epochs=epochs)
-    torch.save(model.state_dict(), cfg.DIR.FINAL_MODEL + 'final_model_state_dic.pt')
-    torch.save(model, cfg.DIR.FINAL_MODEL + 'final_model.pt')
+    torch.save(model.state_dict(), cfg.DIR.FINAL_MODEL + '/final_artist20_slice_3s_model_state_dic.pt')
+    torch.save(model, cfg.DIR.FINAL_MODEL + '/final_artist20_slice_3s_model.pt')
