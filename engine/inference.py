@@ -1,5 +1,6 @@
 import logging
 
+import torch
 from ignite.engine import Events
 from ignite.engine import create_supervised_evaluator
 from ignite.metrics import Accuracy, Fbeta
@@ -29,7 +30,21 @@ def inference(
     @evaluator.on(Events.EPOCH_COMPLETED)
     def print_validation_results(engine):
         metrics = evaluator.state.metrics
-        avg_acc = metrics['accuracy']
-        logger.info("Validation Results - Accuracy: {:.3f}".format(avg_acc))
+        metrics = evaluator.state.metrics
+
+        _avg_accuracy = metrics['accuracy']
+
+        _precision = metrics['precision']
+        _precision = torch.mean(_precision)
+
+        _recall = metrics['recall']
+        _recall = torch.mean(_recall)
+
+        _f1 = metrics['f1']
+        _f1 = torch.mean(_f1)
+
+        logger.info(
+            "Test Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f}".format(
+                engine.state.epoch, _avg_accuracy, _precision, _recall, _f1))
 
     evaluator.run(val_loader)
