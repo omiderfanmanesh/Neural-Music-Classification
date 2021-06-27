@@ -8,11 +8,11 @@ _C = CN()
 
 _C.MODEL = CN()
 _C.MODEL.DEVICE = 'cuda'
-_C.MODEL.NUM_CLASSES = 21
+_C.MODEL.NUM_CLASSES = 10
 _C.MODEL.NUM_GPU = 1
-_C.MODEL.NAME = 'ARTIST20'
+_C.MODEL.NAME = 'GTZAN'
 _C.MODEL.PRE_TRAINED = False
-_C.MODEL.PRE_TRAINED_ADDRESS = '../outputs/best_models/best_model_6_val_loss_ce_loss=0.5245.pt'
+_C.MODEL.PRE_TRAINED_ADDRESS = '../outputs/best_models/final_artist20_slice_3s_model_state_dic.pt'
 # -----------------------------------------------------------------------------
 # INPUT
 # -----------------------------------------------------------------------------
@@ -32,14 +32,14 @@ _C.DATALOADER = CN()
 _C.DATALOADER.NUM_WORKERS = 2
 _C.DATALOADER.DATASET_ADDRESS = '/home/omid/OMID/projects/python/mldl/NeuralMusicClassification/data/dataset/genres_original'
 
-_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '../data/dataset/artist20/label_train_20_94_42.npy'
-_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '../data/dataset/artist20/sample_train_20_94_42.npy'
+_C.DATALOADER.NPY_LABELS_TRAIN_DATASET_ADDRESS = '../data/dataset/np_data/train/labels_train_entire_songs.npy'
+_C.DATALOADER.NPY_SAMPLES_TRAIN_DATASET_ADDRESS = '../data/dataset/np_data/train/samples_train_entire_songs.npy'
 
-_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '../data/dataset/artist20/label_test_20_94_42.npy'
-_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '../data/dataset/artist20/sample_test_20_94_42.npy'
+_C.DATALOADER.NPY_LABELS_TEST_DATASET_ADDRESS = '../data/dataset/np_data/test/labels_test.npy'
+_C.DATALOADER.NPY_SAMPLES_TEST_DATASET_ADDRESS = '../data/dataset/np_data/test/samples_test.npy'
 
-_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '../data/dataset/artist20/label_val_20_94_42.npy'
-_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '../data/dataset/artist20/sample_val_20_94_42.npy'
+_C.DATALOADER.NPY_LABELS_VALIDATION_DATASET_ADDRESS = '../data/dataset/np_data/validation/labels_val.npy'
+_C.DATALOADER.NPY_SAMPLES_VALIDATION_DATASET_ADDRESS = '../data/dataset/np_data/validation/samples_val.npy'
 
 _C.DATALOADER.LOAD_FROM_NUMPY = True
 _C.DATALOADER.ONE_HOT_ENCODING = True
