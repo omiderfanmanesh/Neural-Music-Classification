@@ -100,7 +100,7 @@ _C.SOLVER.IMS_PER_BATCH = 16
 # see 2 images per batch
 _C.TEST = CN()
 _C.TEST.IMS_PER_BATCH = 16
-_C.TEST.WEIGHT = "/final_artist20_slice_3s_model_state_dic.pt"
+_C.TEST.WEIGHT = "/30s_gtzan_no_aug_model.pth"
 
 # ---------------------------------------------------------------------------- #
 # Outputs

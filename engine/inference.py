@@ -7,6 +7,8 @@ from ignite.metrics import Accuracy, Fbeta
 from ignite.metrics.precision import Precision
 from ignite.metrics.recall import Recall
 
+from metrics.f1score import F1Score
+
 
 def inference(
         cfg,
@@ -21,10 +23,14 @@ def inference(
     precision = Precision(average=False)
     recall = Recall(average=False)
     F1 = Fbeta(beta=1.0, average=False, precision=precision, recall=recall)
-    evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(),
-                                                            'precision': precision,
-                                                            'recall': recall,
-                                                            'f1': F1}, device=device)
+    metrics = {'accuracy': Accuracy(),
+               'precision': precision,
+               'recall': recall,
+               'f1_micro': F1Score(),
+               'f1': F1}
+    evaluator = create_supervised_evaluator(model,
+                                            metrics=metrics,
+                                            device=device)
 
     # adding handlers using `evaluator.on` decorator API
     @evaluator.on(Events.EPOCH_COMPLETED)
@@ -43,8 +49,9 @@ def inference(
         _f1 = metrics['f1']
         _f1 = torch.mean(_f1)
 
+        _f1_micro = metrics['f1_micro']
         logger.info(
-            "Test Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f}".format(
-                engine.state.epoch, _avg_accuracy, _precision, _recall, _f1))
+            "Test Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f}, f1_micro: {:.2f}".format(
+                engine.state.epoch, _avg_accuracy, _precision, _recall, _f1, _f1_micro))
 
     evaluator.run(val_loader)
