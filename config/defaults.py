@@ -86,7 +86,7 @@ _C.OPT.ADADELTA.WEIGHT_DECAY = 1e-5  # DEFAULT 0
 # ---------------------------------------------------------------------------- #
 _C.SOLVER = CN()
 
-_C.SOLVER.MAX_EPOCHS = 50
+_C.SOLVER.MAX_EPOCHS = 150
 
 _C.SOLVER.CHECKPOINT_PERIOD = 10
 _C.SOLVER.LOG_PERIOD = 100
@@ -100,7 +100,7 @@ _C.SOLVER.IMS_PER_BATCH = 16
 # see 2 images per batch
 _C.TEST = CN()
 _C.TEST.IMS_PER_BATCH = 16
-_C.TEST.WEIGHT = "/30s_gtzan_no_aug_model.pth"
+_C.TEST.WEIGHT = "/30s_gtzan_no_aug_model.pt"
 
 # ---------------------------------------------------------------------------- #
 # Outputs

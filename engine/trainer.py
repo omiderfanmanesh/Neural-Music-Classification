@@ -209,7 +209,7 @@ def train_ignite(
 
     early_stopping_handler = EarlyStopping(patience=10, score_function=score_function, trainer=trainer)
 
-    # evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
+    evaluator.add_event_handler(Events.COMPLETED, early_stopping_handler)
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(engine):
@@ -247,5 +247,5 @@ def train_ignite(
                 optimizer=optimizer, trainer=trainer, evaluator=evaluator,
                 log_dir=cfg.DIR.TENSORBOARD_LOG)
 
-    torch.save(model.state_dict(), cfg.DIR.FINAL_MODEL + '/30s_gtzan_no_aug_model.pt')
+    torch.save(model.state_dict(), cfg.DIR.FINAL_MODEL + '/30s_gtzan_no_aug_model_state_dict.pt')
     torch.save(model, cfg.DIR.FINAL_MODEL + '/30s_gtzan_no_aug_model.pt')
