@@ -26,7 +26,7 @@ def main():
     logger.info("Using {} GPUS".format(num_gpus))
 
     model = build_model(cfg)
-    weight = torch.load(cfg.DIR.FINAL_MODEL + cfg.TEST.WEIGHT)
+    weight = torch.load(cfg.DIR.BEST_MODEL + cfg.TEST.WEIGHT)
     model.to(device=device)
     model.load_state_dict(weight)
     val_loader = make_data_loader(cfg, inference=True)
