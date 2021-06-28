@@ -16,6 +16,8 @@ from sklearn.metrics import f1_score
 from metrics.f1score import F1Score
 from utils import AverageMeter
 from utils import utilities
+from utils.utilities import log_result
+from utils.utilities import tesnorboard
 
 
 def do_train(
@@ -222,88 +224,28 @@ def train_ignite(
         evaluator.run(train_loader)
 
         metrics = evaluator.state.metrics
-        _avg_accuracy = metrics['accuracy']
+        log_result(title="Training", logger=logger, engine=engine, metrics=metrics)
 
-        _precision = metrics['precision']
-        _precision = torch.mean(_precision)
-
-        _recall = metrics['recall']
-        _recall = torch.mean(_recall)
-
-        _f1 = metrics['f1']
-        _f1 = torch.mean(_f1)
-
-        _f1_micro = metrics['f1_micro']
-
-        _avg_loss = metrics['ce_loss']
-
-        logger.info(
-            "Training Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, f1 score: {:.3f}, "
-            "f1_micro: {:.2f}, "
-            "Avg Loss: {:.3f} ".format(engine.state.epoch, _avg_accuracy, _precision, _recall, _f1, _f1_micro,
-                                       _avg_loss))
-
-        if val_loader is not None:
-            @trainer.on(Events.EPOCH_COMPLETED)
-            def log_validation_results(engine):
-                evaluator.run(val_loader)
-                metrics = evaluator.state.metrics
-
-                _avg_accuracy = metrics['accuracy']
-
-                _precision = metrics['precision']
-                _precision = torch.mean(_precision)
-
-                _recall = metrics['recall']
-                _recall = torch.mean(_recall)
-
-                _f1 = metrics['f1']
-                _f1 = torch.mean(_f1)
-                _f1_micro = metrics['f1_micro']
-                _avg_loss = metrics['ce_loss']
-
-                logger.info(
-                    "Validation Results - Epoch: {} Avg accuracy: {:.3f}, precision: {:.3f}, recall: {:.3f}, "
-                    "f1 score: {:.3f}, f1_micro: {:.2f}, Avg Loss: {:.3f} "
-                        .format(engine.state.epoch, _avg_accuracy, _precision, _recall, _f1, _f1_micro, _avg_loss)
-                )
-
-        # adding handlers using `trainer.on` decorator API
+    if val_loader is not None:
         @trainer.on(Events.EPOCH_COMPLETED)
-        def print_times(engine):
-            logger.info('Epoch {} done. Time per batch: {:.3f}[s] Speed: {:.1f}[samples/s]'
-                        .format(engine.state.epoch, timer.value() * timer.step_count,
-                                train_loader.batch_size / timer.value()))
-            timer.reset()
+        def log_validation_results(engine):
+            evaluator.run(val_loader)
+            metrics = evaluator.state.metrics
+            log_result(title="Validation", logger=logger, engine=engine, metrics=metrics)
 
-        # def get_saved_model_path(epoch):
-        #     return f'{cfg.DIR.BEST_MODEL}/Model_{model_name}_{epoch}.pth'
-        # best_loss = 0.
-        # best_epoch = 1
-        # best_epoch_file = ''
-        #
-        # @trainer.on(Events.EPOCH_COMPLETED)
-        # def save_best_epoch_only(engine):
-        #     epoch = engine.state.epoch
-        #
-        #     global best_loss
-        #     global best_epoch
-        #     global best_epoch_file
-        #     best_loss = 0. if epoch == 1 else best_loss
-        #     best_epoch = 1 if epoch == 1 else best_epoch
-        #     best_epoch_file = '' if epoch == 1 else best_epoch_file
-        #     metrics = evaluator.run(val_loader).metrics
-        #     if metrics['ce_loss'] < best_loss:
-        #         prev_best_epoch_file = get_saved_model_path(best_epoch)
-        #         if os.path.exists(prev_best_epoch_file):
-        #             os.remove(prev_best_epoch_file)
-        #
-        #         best_loss = metrics['ce_loss']
-        #         best_epoch = epoch
-        #         best_epoch_file = get_saved_model_path(best_epoch)
-        #         print(f'\nEpoch: {best_epoch} - Loss is improved! Loss: {best_loss}\n\n\n')
-        #         torch.save(model, best_epoch_file)
+    # adding handlers using `trainer.on` decorator API
+    @trainer.on(Events.EPOCH_COMPLETED)
+    def print_times(engine):
+        logger.info('Epoch {} done. Time per batch: {:.3f}[s] Speed: {:.1f}[samples/s]'
+                    .format(engine.state.epoch, timer.value() * timer.step_count,
+                            train_loader.batch_size / timer.value()))
+        timer.reset()
 
     trainer.run(train_loader, max_epochs=epochs)
+
+    tesnorboard(Events=Events, model=model, metrics=['accuracy', 'precision', 'recall', 'f1', 'f1_micro', 'ce_loss'],
+                optimizer=optimizer, trainer=trainer, evaluator=evaluator,
+                log_dir=cfg.DIR.TENSORBOARD_LOG)
+
     torch.save(model.state_dict(), cfg.DIR.FINAL_MODEL + '/30s_gtzan_no_aug_model.pt')
     torch.save(model, cfg.DIR.FINAL_MODEL + '/30s_gtzan_no_aug_model.pt')
