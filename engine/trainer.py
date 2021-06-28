@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+import os
 from time import time
 
 import numpy as np
@@ -240,6 +241,37 @@ def train_ignite(
                     .format(engine.state.epoch, timer.value() * timer.step_count,
                             train_loader.batch_size / timer.value()))
         timer.reset()
+
+    def get_saved_model_path(epoch):
+        return f'{cfg.DIR.BEST_MODEL}/Model_{model_name}_{epoch}.pth'
+
+    best_f1 = 0.
+    best_epoch = 1
+    best_epoch_file = ''
+
+    @trainer.on(Events.EPOCH_COMPLETED)
+    def save_best_epoch_only(engine):
+        epoch = engine.state.epoch
+
+        global best_f1
+        global best_epoch
+        global best_epoch_file
+        best_f1 = 0. if epoch == 1 else best_f1
+        best_epoch = 1 if epoch == 1 else best_epoch
+        best_epoch_file = '' if epoch == 1 else best_epoch_file
+
+        metrics = evaluator.run(val_loader).metrics
+
+        if metrics['f1_micro'] > best_f1:
+            prev_best_epoch_file = get_saved_model_path(best_epoch)
+            if os.path.exists(prev_best_epoch_file):
+                os.remove(prev_best_epoch_file)
+
+            best_f1 = metrics['f1_micro']
+            best_epoch = epoch
+            best_epoch_file = get_saved_model_path(best_epoch)
+            print(f'\nEpoch: {best_epoch} - New best f1_micro! f1_micro: {best_f1}\n\n\n')
+            torch.save(model.state_dict(), best_epoch_file)
 
     trainer.run(train_loader, max_epochs=epochs)
 
